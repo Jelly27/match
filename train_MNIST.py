@@ -1,4 +1,4 @@
-import torch
+import torch, torchvision
 from torch import nn, optim, max, save, manual_seed
 from torch.cuda import is_available
 from torch.utils.data import DataLoader, random_split
@@ -13,33 +13,24 @@ def main(opt):
     BATCH_SIZE = opt.batch_size
     LEARNING_RATE = opt.lr
     EPOCH = opt.epochs
-    N_CLASSES = opt.num_classes
-    ratio = 0.7
     device = "cuda" if is_available() else "cpu"
 
-    transform = transforms.Compose([
-        transforms.RandomResizedCrop(224),
-        transforms.RandomHorizontalFlip(),
-        transforms.ToTensor(),
-        transforms.Normalize(mean=[0.52, 0.52, 0.52],
-                             std=[0.23, 0.23, 0.23]),
-    ])
+    transform = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.5,), (0.5,))])
+    # 下载和加载MNIST数据集
+    train_dataset = torchvision.datasets.MNIST(root='./data', train=True, transform=transform, download=True)
+    test_dataset = torchvision.datasets.MNIST(root='./data', train=False, transform=transform, download=True)
 
-    dataset = datasets.ImageFolder("data", transform)
-    data_size = len(dataset)
-    split = int(data_size * ratio)
+    # 创建数据加载器
+    train_loader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True)
+    test_loader = DataLoader(test_dataset, batch_size=BATCH_SIZE, shuffle=False)
+
     manual_seed(42)
-
-    trainSet, testSet = random_split(dataset, [split, data_size - split])
-
-    trainLoader = DataLoader(trainSet, BATCH_SIZE, True)
-    testLoader = DataLoader(testSet, BATCH_SIZE, False)
 
     model = MODEL  # 没有预训练权重，整个网络都需要训练
     model.to(device)
 
     criterion = nn.CrossEntropyLoss()
-    optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE)
+    optimizer = optim.SGD(model.parameters(), lr=0.01)
     scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer)
 
     writer = SummaryWriter("logs")
