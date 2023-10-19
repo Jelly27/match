@@ -61,6 +61,7 @@ class EfficientNet(nn.Module):
     def __init__(self, num_classes):
         super(EfficientNet, self).__init__()
         self.model = timm.create_model('efficientnetv2_s', num_classes=num_classes)
+        self.model.conv_stem = nn.Conv2d(1, 24, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1), bias=False)
 
     def forward(self, x):
         return self.model(x)

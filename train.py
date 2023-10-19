@@ -18,17 +18,18 @@ def main(opt):
     device = "cuda" if is_available() else "cpu"
 
     transform = transforms.Compose([
+        transforms.Grayscale(),
         transforms.RandomResizedCrop(224),
         transforms.RandomHorizontalFlip(),
         transforms.ToTensor(),
-        transforms.Normalize(mean=[0.52, 0.52, 0.52],
-                             std=[0.23, 0.23, 0.23]),
+        transforms.Normalize(mean=[0.52],
+                             std=[0.23]),
     ])
 
-    dataset = datasets.ImageFolder("data", transform)
+    dataset = datasets.ImageFolder("cdata", transform)
     data_size = len(dataset)
     split = int(data_size * ratio)
-    manual_seed(42)
+    # manual_seed(42)
 
     trainSet, testSet = random_split(dataset, [split, data_size - split])
 
@@ -86,7 +87,7 @@ if __name__ == '__main__':
     parser.add_argument('-e', '--epochs', type=int, default=10)
     parser.add_argument('-b', '--batch-size', type=int, default=32)
     parser.add_argument('--lr', type=float, default=0.001)
-    parser.add_argument('--data-path', type=str, default="./data")
+    parser.add_argument('--data-path', type=str, default="./cdata")
     parser.add_argument('--save-path', type=str, default="./save")
 
     opt = parser.parse_args()

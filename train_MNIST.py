@@ -9,7 +9,7 @@ from torch.utils.tensorboard import SummaryWriter
 
 
 def main(opt):
-    MODEL = EfficientNet(14)
+    MODEL = EfficientNet(10)
     BATCH_SIZE = opt.batch_size
     LEARNING_RATE = opt.lr
     EPOCH = opt.epochs
@@ -21,18 +21,17 @@ def main(opt):
     test_dataset = torchvision.datasets.MNIST(root='./data', train=False, transform=transform, download=True)
 
     # 创建数据加载器
-    train_loader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True)
-    test_loader = DataLoader(test_dataset, batch_size=BATCH_SIZE, shuffle=False)
-
-    manual_seed(42)
+    trainLoader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True)
+    testLoader = DataLoader(test_dataset, batch_size=BATCH_SIZE, shuffle=False)
 
     model = MODEL  # 没有预训练权重，整个网络都需要训练
+    # model.conv_stem = torch.nn.Conv2d(1, 24, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1), bias=False)
+    # print(model)
     model.to(device)
 
     criterion = nn.CrossEntropyLoss()
-    optimizer = optim.SGD(model.parameters(), lr=0.01)
+    optimizer = optim.SGD(model.parameters(), lr=LEARNING_RATE)
     scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer)
-
     writer = SummaryWriter("logs")
 
     for epoch in range(EPOCH):
@@ -73,10 +72,10 @@ if __name__ == '__main__':
     import argparse
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--num_classes', type=int, default=14)
-    parser.add_argument('-e', '--epochs', type=int, default=10)
-    parser.add_argument('-b', '--batch-size', type=int, default=32)
-    parser.add_argument('--lr', type=float, default=0.001)
+    parser.add_argument('--num_classes', type=int, default=10)
+    parser.add_argument('-e', '--epochs', type=int, default=100)
+    parser.add_argument('-b', '--batch-size', type=int, default=768)
+    parser.add_argument('--lr', type=float, default=0.01)
     parser.add_argument('--data-path', type=str, default="./data")
     parser.add_argument('--save-path', type=str, default="./save")
 
