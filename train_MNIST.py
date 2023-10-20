@@ -16,7 +16,7 @@ def main(args):
     EPOCH = args.epochs
     device = "cuda" if is_available() else "cpu"
 
-    transform = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.1307,), (0.3081,))])
+    transform = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.1307,), (0.3015,))])
     # 下载和加载MNIST数据集
     train_dataset = torchvision.datasets.MNIST(root=DATA_PATH, train=True, transform=transform, download=True)
     test_dataset = torchvision.datasets.MNIST(root=DATA_PATH, train=False, transform=transform, download=True)
