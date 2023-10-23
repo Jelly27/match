@@ -9,11 +9,10 @@ from torch.utils.tensorboard import SummaryWriter
 
 
 def main(opt):
-    MODEL = EfficientNet(14)
+    MODEL = EfficientNet(opt.num_classes, 1)
     BATCH_SIZE = opt.batch_size
     LEARNING_RATE = opt.lr
     EPOCH = opt.epochs
-    N_CLASSES = opt.num_classes
     ratio = 0.7
     device = "cuda" if is_available() else "cpu"
 
@@ -22,11 +21,11 @@ def main(opt):
         transforms.RandomResizedCrop(224),
         transforms.RandomHorizontalFlip(),
         transforms.ToTensor(),
-        transforms.Normalize(mean=[0.52],
-                             std=[0.23]),
+        transforms.Normalize(mean=[0.5202],
+                             std=[0.2309]),
     ])
 
-    dataset = datasets.ImageFolder("cdata", transform)
+    dataset = datasets.ImageFolder(opt.data_path, transform)
     data_size = len(dataset)
     split = int(data_size * ratio)
     # manual_seed(42)
@@ -49,11 +48,13 @@ def main(opt):
         # 每个epoch进行一轮训练和评估
         # 训练和测试完成后及时回收显存中的数据
         model.train()
+        mean_loss = 0
         for idx, (images, labels) in enumerate(trainLoader):
             images, labels = images.to(device), labels.to(device)
             optimizer.zero_grad()
             outputs = model(images)
             loss = criterion(outputs, labels)
+            mean_loss += loss
             print(f"[Epoch: {epoch + 1}, {idx + 1}/{len(trainLoader)}] "
                   f"loss: {round(loss.data.item(), 6)}, "
                   f"lr: {round(optimizer.param_groups[0]['lr'], 6)}")
@@ -62,7 +63,10 @@ def main(opt):
         del images, labels, outputs
         scheduler.step(loss.data.item())
         del loss
-
+        mean_loss /= len(trainLoader)
+        print(f"mean loss:{mean_loss}")
+        if opt.tensorboard:
+            writer.add_scalar("mean loss/train", mean_loss, epoch + 1)
         # 评估
         with torch.no_grad():
             model.eval()
@@ -75,7 +79,8 @@ def main(opt):
                 total += labels.size(0)  # 统计测试集中标签的个数
                 correct += (predicted.cpu() == labels).sum()  # 统计预测正确的个数
             del images, outputs
-            writer.add_scalar("acc/test", correct / total, epoch + 1)
+            if opt.tensorboard:
+                writer.add_scalar("acc/test", correct / total, epoch + 1)
             print(f"[Epoch {epoch + 1}] avg acc: {100 * correct / total}")
 
 
@@ -84,12 +89,13 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--num_classes', type=int, default=14)
-    parser.add_argument('-e', '--epochs', type=int, default=10)
+    parser.add_argument('-e', '--epochs', type=int, default=500)
     parser.add_argument('-b', '--batch-size', type=int, default=32)
     parser.add_argument('--lr', type=float, default=0.001)
-    parser.add_argument('--data-path', type=str, default="./cdata")
+    parser.add_argument('--data-path', type=str, default="./lung_ct")
     parser.add_argument('--save-path', type=str, default="./save")
+    parser.add_argument('-t', '--tensorboard', action="store_true")
 
-    opt = parser.parse_args()
+    opt = parser.parse_args(["-t"])
 
     main(opt)
