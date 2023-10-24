@@ -18,7 +18,7 @@ def get_relative_paths(root_dir):
 
 def main():
     start = time()
-    path = "lung_ct"
+    path = "XR_SHOULDER"
 
     img_name_list = get_relative_paths(path)[1:]
     cumulative_mean = 0
@@ -45,6 +45,11 @@ def main():
         mean: 132.65929430324667, 0.5202325266793987
         std: 58.8832943322999, 0.2309148797345094
         用时: 0:00:44
+        
+        XR_SHOULDER 2分类
+        mean: 65.8149335691691, 0.2580977787026239
+        std: 33.37347416732489, 0.13087636928362703
+        用时: 0:00:22
     """
 
 
