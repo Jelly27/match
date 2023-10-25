@@ -1,11 +1,12 @@
 import torch
-from torch import nn, optim, max, save, manual_seed
+from torch import nn, optim, max, save, load, manual_seed
 from torch.cuda import is_available
 from torch.utils.data import DataLoader, random_split
 from torchvision import datasets, transforms
 from tqdm import tqdm
 from torch.utils.tensorboard import SummaryWriter
 import os
+from datetime import datetime
 
 """
     训练代码的基类
@@ -21,6 +22,7 @@ class Train:
                  epoches: int = 100,
                  batch_size: int = 32,
                  lr: float = 1E-3,
+                 # load: str = "",
                  save_path: str = "./check_point",
                  tensorboard: bool = True):
         """
@@ -35,6 +37,7 @@ class Train:
         self.EPOCHES = epoches
         self.BATCH_SIZE = batch_size
         self.LR = lr
+        # self.LOAD = load
         self.SAVE_PATH = save_path
         self.TB = tensorboard
 
@@ -51,7 +54,7 @@ class Train:
         criterion = nn.CrossEntropyLoss()
         optimizer = optim.Adam(net.parameters(), lr=self.LR)
         scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer)
-        writer = SummaryWriter("logs")
+        writer = SummaryWriter()
         best_acc = 0.0
         for epoch in range(self.EPOCHES):
             # 每个epoch进行一轮训练和评估
@@ -61,15 +64,15 @@ class Train:
                 break
             net.train()
             mean_loss = 0
-            for idx, (images, labels) in enumerate(trainLoader):
+            for idx, (images, labels) in tqdm(enumerate(trainLoader), f"[Epoch {epoch + 1}] {len(trainLoader)}"):
                 images, labels = images.to(device), labels.to(device)
                 optimizer.zero_grad()
                 outputs = net(images)
                 loss = criterion(outputs, labels)
                 mean_loss += loss
-                print(f"[Epoch: {epoch + 1}, {idx + 1}/{len(trainLoader)}] "
-                      f"loss: {round(loss.data.item(), 6)}, "
-                      f"lr: {round(optimizer.param_groups[0]['lr'], 6)}")
+                # print(f"[Epoch: {epoch + 1}, {idx + 1}/{len(trainLoader)}] "
+                #       f"loss: {round(loss.data.item(), 6)}, "
+                #       f"lr: {round(optimizer.param_groups[0]['lr'], 6)}")
                 loss.backward()
                 optimizer.step()
             del images, labels, outputs
@@ -97,7 +100,8 @@ class Train:
                 best_acc = acc
                 if not os.path.exists(self.SAVE_PATH):
                     os.mkdir(self.SAVE_PATH)
-                save(net.state_dict(), os.path.join(self.SAVE_PATH, f"epoch{epoch + 1}.pth"))
+                save(net.state_dict(),
+                     os.path.join(self.SAVE_PATH, f"{datetime.now().strftime('%Y%m%d-%H%M%S')}epoch{epoch + 1}.pth"))
             if self.TB:
                 writer.add_scalar("acc/test", acc, epoch + 1)
             print(f"[Epoch {epoch + 1}] avg acc: {acc}")

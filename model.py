@@ -66,11 +66,3 @@ class EfficientNet(nn.Module):
 
     def forward(self, x):
         return self.model(x)
-
-
-if __name__ == '__main__':
-    model = nn.LSTM(input_size=10, hidden_size=4, num_layers=1, batch_first=True)
-    net = EfficientNet(3)
-    print(summary(model, (10, 224, 224), device="cpu"))
-    # 调试时在控制台输入next(model.parameters()).device查看模型是否在GPU上
-    pass
