@@ -18,6 +18,7 @@ class Train:
                  data_path: str,
                  transform: transforms,
                  net: nn.Module,
+                 # device: str,
                  ratio: float = 0.7,
                  epoches: int = 100,
                  batch_size: int = 32,
@@ -33,6 +34,7 @@ class Train:
         self.DATA_PATH = data_path
         self.TRANSFORM = transform
         self.NET = net
+        # self.DEVICE = device
         self.RATIO = ratio
         self.EPOCHES = epoches
         self.BATCH_SIZE = batch_size
@@ -104,4 +106,4 @@ class Train:
                      os.path.join(self.SAVE_PATH, f"{datetime.now().strftime('%Y%m%d-%H%M%S')}epoch{epoch + 1}.pth"))
             if self.TB:
                 writer.add_scalar("acc/test", acc, epoch + 1)
-            print(f"[Epoch {epoch + 1}] avg acc: {acc}")
+            print(f"[Epoch {epoch + 1}] avg acc: {acc}, lr:{optimizer.param_groups[0].get('lr', 0)}")

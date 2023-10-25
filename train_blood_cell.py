@@ -5,7 +5,7 @@ from train import Train
 if __name__ == '__main__':
     transform1 = transforms.Compose([
         # transforms.Grayscale(),
-        transforms.RandomResizedCrop(224),
+        transforms.Resize((224, 224)),
         transforms.RandomHorizontalFlip(),
         transforms.ToTensor(),
         transforms.Normalize(mean=[0.65791, 0.63881, 0.67597],
