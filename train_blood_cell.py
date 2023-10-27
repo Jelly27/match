@@ -12,5 +12,5 @@ if __name__ == '__main__':
                              std=[0.25579, 0.25846, 0.25891])
     ])
 
-    t = Train("blood_cell", transform1, EfficientNet(4, 3), epoches=100, lr=1E-3)
+    t = Train("blood_cell_train", transform1, EfficientNet(4, 3), epoches=100, lr=1E-3)
     t.start()

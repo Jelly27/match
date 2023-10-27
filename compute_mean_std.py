@@ -51,7 +51,7 @@ def main(path: str, mode: int = 1):
 
 
 if __name__ == '__main__':
-    main("blood_cell")
+    main("blood_cell_train")
     """
         blood_cell 4分类 用时52''
         灰度 mean=[0.6546], std=[0.2571]
