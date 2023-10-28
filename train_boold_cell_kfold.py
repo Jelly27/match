@@ -19,12 +19,12 @@ from sklearn.model_selection import KFold
 if __name__ == '__main__':
     TIMES = 10
     K = 5
-    DATA_PATH = "cell"
+    DATA_PATH = "blood_cell_train"
     RATIO = 0.7
     BATCH_SIZE = 32
     NET = EfficientNet(4)
     LR = 1E-3
-    EPOCHES = 10
+    EPOCHES = 50
     TB = True
     SAVE_PATH = "check_point"
     TRANSFORM = transforms.Compose([
@@ -53,7 +53,7 @@ if __name__ == '__main__':
             criterion = nn.CrossEntropyLoss()
             optimizer = optim.Adam(net.parameters(), lr=LR)
             scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer)
-            writer = SummaryWriter(comment=f"split_seed:{r}")
+            writer = SummaryWriter(comment=f"split_seed{r}")
             best_acc = 0.0
             for epoch in range(EPOCHES):
                 # 每个epoch进行一轮训练和评估
